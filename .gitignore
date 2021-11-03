@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 
+/node_modules
+
 #ignore JSON file, use development file
 appsettings.json
 

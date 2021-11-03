@@ -37,7 +37,12 @@ namespace API
 
             services.AddDbContext<DataContext> (option => { 
                 option.UseSqlite(_config.GetConnectionString("DefaultConnection")); 
-                });
+            });
+
+            //adding CORS
+            services.AddCors(options => {
+                options.AddPolicy("DefaultPolicy",builder => { builder.WithOrigins("http://localhost:3000"); });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +59,7 @@ namespace API
 
             app.UseRouting();
 
+            app.UseCors("DefaultPolicy");
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
