@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { SyntheticEvent, useState } from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
 import { Activity } from '../../app/models/Activity';
 
@@ -7,9 +7,18 @@ interface Props {
     cancelSelectedActivity: () => void;
     openForm: (id: string) => void;
     deleteActivity: (id: string) => void;
+    deleting: boolean;
 }
 
-const ActivityDetials: Function = ({ activity, cancelSelectedActivity, openForm, deleteActivity }: Props) => {
+const ActivityDetials: Function = ({ activity, cancelSelectedActivity, openForm, deleteActivity, deleting }: Props) => {
+    
+    const [target , setTarget] = useState('');
+    
+    function handleDeleteActivity(event : SyntheticEvent<HTMLButtonElement> , id : string) {
+        setTarget(event.currentTarget.name);
+        deleteActivity(id);
+    }
+    
     return (
         <Card fluid>
             <Image src={`/assets/images/categoryImages/${activity.category}.jpg`} wrapped ui={false} />
@@ -25,7 +34,8 @@ const ActivityDetials: Function = ({ activity, cancelSelectedActivity, openForm,
             <Card.Content extra>
                 <Button.Group widths='3'>
                     <Button basic color='blue' content="Edit" onClick={() => openForm(activity.id)} />
-                    <Button basic color='green' content="Delete" onClick={() => deleteActivity(activity.id)} />
+                    <Button loading={deleting && target === activity.id} basic color='green' content="Delete" 
+                        name={activity.id} onClick={(ev) => handleDeleteActivity(ev,activity.id)} />
                     <Button basic color='red' content="Cancel" onClick={cancelSelectedActivity} />
                 </Button.Group>
             </Card.Content>

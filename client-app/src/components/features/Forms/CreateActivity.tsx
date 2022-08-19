@@ -6,9 +6,10 @@ interface Props {
     selectedActivity: Activity | undefined;
     closeForm: () => void;
     createOrEditActivity : (activity : Activity) => void;
+    submitting : boolean;
 }
 
-export default function CreateActivity({ closeForm, selectedActivity, createOrEditActivity }: Props) {
+export default function CreateActivity({ closeForm, selectedActivity, createOrEditActivity, submitting }: Props) {
 
     const initialState = selectedActivity ?? { id: '', title: '', date: '', description: '', category: '', city: '', venue: '' }
     const [activity, setActivity] = useState(initialState);
@@ -29,11 +30,11 @@ export default function CreateActivity({ closeForm, selectedActivity, createOrEd
                 <Form.Input placeholder="Title" value={activity.title} name='title' onChange={handleChange} />
                 <Form.TextArea placeholder="Descriptiom" value={activity.description} name='description' onChange={handleChange} />
                 <Form.Input placeholder="Catagory" value={activity.category} name='category' onChange={handleChange} />
-                <Form.Input placeholder="Data" value={activity.date} name='date' onChange={handleChange} />
+                <Form.Input type="date" placeholder="Date" value={activity.date} name='date' onChange={handleChange} />
                 <Form.Input placeholder="City" value={activity.city} name='city' onChange={handleChange} />
                 <Form.Input placeholder="Venue" value={activity.venue} name='venue' onChange={handleChange} />
 
-                <Button floated="right" size="small" positive content="Save" type="submit" />
+                <Button floated="right" loading={submitting} size="small" positive content="Save" type="submit" />
                 <Button floated="right" size="small" content="Cancel" onClick={closeForm} />
 
             </Form>

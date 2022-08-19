@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import 'semantic-ui-css/semantic.min.css'
 import { Container } from 'semantic-ui-react';
 import { Activity } from './models/Activity';
 import Navbar from './layout/Navbar';
 import ActivitiesDashboard from '../features/activities/ActivitiesDashboard';
-import {v4 as uuid} from 'uuid';
-
-const urlAddress = 'https://localhost:5001/api/activities';
+import { v4 as uuid } from 'uuid';
+import agent from './api/axiosagnet';
+import LoadingComponent from './layout/LoadingCompnent';
 
 function App() {
 
@@ -15,10 +14,20 @@ function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting , setDeleting] = useState(false);
+  
 
   useEffect(() => {
-    axios.get<Activity[]>(urlAddress).then(response => {
-      setActivities(response.data);
+    agent.Activities.list().then(res => {
+      let activities: Activity[] = [];
+      res.forEach(activity => {
+        activity.date = activity.date.split("T")[0];
+        activities.push(activity);
+      });
+      setActivities(activities);
+      setLoading(false);
     })
   }, []);
 
@@ -42,38 +51,61 @@ function App() {
   }
 
   function createOrEditActivity(activity: Activity) {
-    activity.id ? setActivities([...activities.filter(act => act.id !== activity.id), activity])
-      : setActivities([...activities, {...activity, id: uuid()}]);
-    setEditMode(false);
-    setSelectedActivity(activity);
+    //update
+    if (activity.id) {
+      setSubmitting(true);
+      agent.Activities.update(activity).then(() => {
+        setActivities([...activities.filter(act => act.id !== activity.id), activity]);
+        setSelectedActivity(activity);
+        setEditMode(false);
+        setSubmitting(false);
+      })
+    }
+    //create
+    else {
+      setSubmitting(true);
+      activity.id = uuid();
+      agent.Activities.create(activity).then(() => {
+        setActivities([...activities, { ...activity }]);
+        setSelectedActivity(activity);
+        setEditMode(false);
+        setSubmitting(false);
+      })
+    }
   }
 
-  function deleteActivity (id : string ){
-    setActivities([...activities.filter(act => act.id !== id)]);
-    setSelectedActivity(undefined);
-    
+  function deleteActivity(id: string) {
+    setDeleting(true);
+    agent.Activities.delete(id).then(() => {
+      setActivities([...activities.filter(act => act.id !== id)]);
+      setSelectedActivity(undefined);
+      setDeleting(false);
+    }).catch(error => alert(error));
+
   }
+  return (loading) ? <LoadingComponent /> :
+    (
+      <>
+        <Navbar openForm={openActivityForm} editMode={editMode} />
 
-  return (
-    <>
-      <Navbar openForm={openActivityForm} editMode={editMode} />
+        <Container style={{ marginTop: "7em" }} >
+          <ActivitiesDashboard
+            activities={activities}
+            selectActivity={HandleSelectedActivity}
+            selectedActivity={selectedActivity}
+            cancelSelectedActivity={cancelSelectedActivity}
+            openForm={openActivityForm}
+            closeForm={closedActivityForm}
+            createOrEditActivity={createOrEditActivity}
+            deleteActivity={deleteActivity}
+            editMode={editMode}
+            submitting={submitting}
+            deleting={deleting}
+          />
+        </Container>
 
-      <Container style={{ marginTop: "7em" }} >
-        <ActivitiesDashboard
-          activities={activities} 
-          selectActivity={HandleSelectedActivity}
-          selectedActivity={selectedActivity} 
-          cancelSelectedActivity={cancelSelectedActivity}
-          openForm={openActivityForm} 
-          closeForm={closedActivityForm} 
-          createOrEditActivity = {createOrEditActivity}
-          deleteActivity = {deleteActivity}
-          editMode={editMode}
-        />
-      </Container>
-
-    </>
-  );
+      </>
+    );
 }
 
 export default App;
