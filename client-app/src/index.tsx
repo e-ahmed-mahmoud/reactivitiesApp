@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom';
 import './components/app/styles.css';
 import App from './components/app/App';
 import reportWebVitals from './reportWebVitals';
+import { store, StoreContext } from './components/app/statemanagement/store';
 
 ReactDOM.render(
- 
-    <App />,
+    <StoreContext.Provider value={store}>
+      <App />
+    </StoreContext.Provider>,
   document.getElementById('root')
 );
 

@@ -1,16 +1,9 @@
 import { Container, Menu, Button } from 'semantic-ui-react';
+import { useStore } from '../statemanagement/store';
 
-interface Props {
-    openForm: (id : undefined) => void;
-    editMode: boolean;
-}
 
-export default function Navbar({ openForm, editMode }: Props) {
-    function HandleopenForm() {
-        editMode = true;
-        openForm(undefined);
-    }
-
+export default function Navbar() {
+    const {activityStore} = useStore();
     return (
         <Menu inverted fixed='top'>
             <Container>
@@ -19,7 +12,7 @@ export default function Navbar({ openForm, editMode }: Props) {
                 </Menu.Item>
                 <Menu.Item name='Activities' />
                 <Menu.Item>
-                    <Button positive content='Create Activity' onClick={HandleopenForm}></Button>
+                    <Button positive content='Create Activity' onClick={() => activityStore.openActivityForm()}></Button>
                 </Menu.Item>
             </Container>
         </Menu>
